@@ -126,4 +126,4 @@ async def custom_swagger_ui_html():
 # ---------------------------------------------------------------------------
 @app.get("/")
 def read_root():
-    return {"message": "EchoBreaker API is live. Visit /docs for Swagger UI."}
+    return {"message": "EchoBreaker API is live. Visit /docs for Swagger UI. Version: 1.0.1"}
