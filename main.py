@@ -43,7 +43,8 @@ async def debug_exception_handler(request, exc):
     import traceback
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc), "traceback": traceback.format_exc()}
+        content={"detail": str(exc), "traceback": traceback.format_exc()},
+        headers={"Access-Control-Allow-Origin": "*"}
     )
 
 # ---------------------------------------------------------------------------
