@@ -27,16 +27,10 @@ app = FastAPI(
 #   e.g.  https://echobreaker.vercel.app,http://localhost:3000
 # If the variable is absent we default to allowing all origins (dev-friendly).
 # ---------------------------------------------------------------------------
-_raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
-if _raw_origins == "*":
-    allow_origins = ["*"]
-else:
-    allow_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allow_origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
