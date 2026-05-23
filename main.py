@@ -126,4 +126,25 @@ async def custom_swagger_ui_html():
 # ---------------------------------------------------------------------------
 @app.get("/")
 def read_root():
-    return {"message": "EchoBreaker API is live. Visit /docs for Swagger UI. Version: 1.0.1"}
+    db_url = os.getenv("DATABASE_URL", "")
+    masked_db_url = "Not Set"
+    if db_url:
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(db_url)
+            netloc = parsed.netloc
+            if "@" in netloc:
+                user_pass, host_port = netloc.split("@", 1)
+                if ":" in user_pass:
+                    user, _ = user_pass.split(":", 1)
+                    netloc = f"{user}:******@{host_port}"
+                else:
+                    netloc = f"{user_pass}:******@{host_port}"
+            masked_db_url = parsed._replace(netloc=netloc).geturl()
+        except Exception as e:
+            masked_db_url = f"Error: {str(e)}"
+            
+    return {
+        "message": "EchoBreaker API is live. Visit /docs for Swagger UI. Version: 1.0.1",
+        "database_url": masked_db_url
+    }
