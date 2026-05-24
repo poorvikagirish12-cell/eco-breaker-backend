@@ -44,8 +44,10 @@ def search_filter_sort_articles(
         if tag:
             cur.execute(
                 """
-                SELECT a.article_id, a.title, a.author_id, a.view_count, a.status, a.published_at
+                SELECT a.article_id, a.title, a.author_id, a.view_count, a.status, a.published_at,
+                       u.username AS author_name, u.is_verified_author
                 FROM articles a
+                JOIN users u ON a.author_id = u.user_id
                 JOIN article_tags at2 ON a.article_id = at2.article_id
                 WHERE at2.tag_id = %s AND a.status = 'PUBLISHED'
                 ORDER BY a.published_at DESC
@@ -55,27 +57,35 @@ def search_filter_sort_articles(
         elif search:
             cur.execute(
                 """
-                SELECT article_id, title, author_id, view_count, status, published_at
-                FROM articles
-                WHERE title ILIKE %s AND status = 'PUBLISHED'
-                ORDER BY published_at DESC
+                SELECT a.article_id, a.title, a.author_id, a.view_count, a.status, a.published_at,
+                       u.username AS author_name, u.is_verified_author
+                FROM articles a
+                JOIN users u ON a.author_id = u.user_id
+                WHERE a.title ILIKE %s AND a.status = 'PUBLISHED'
+                ORDER BY a.published_at DESC
                 """,
                 (f"%{search}%",),
             )
         elif sort == "trending":
             cur.execute(
                 """
-                SELECT article_id, title, author_id, view_count, status, published_at
-                FROM articles WHERE status = 'PUBLISHED'
-                ORDER BY view_count DESC LIMIT 20
+                SELECT a.article_id, a.title, a.author_id, a.view_count, a.status, a.published_at,
+                       u.username AS author_name, u.is_verified_author
+                FROM articles a
+                JOIN users u ON a.author_id = u.user_id
+                WHERE a.status = 'PUBLISHED'
+                ORDER BY a.view_count DESC LIMIT 20
                 """
             )
         else:
             cur.execute(
                 """
-                SELECT article_id, title, author_id, view_count, status, published_at
-                FROM articles WHERE status = 'PUBLISHED'
-                ORDER BY published_at DESC
+                SELECT a.article_id, a.title, a.author_id, a.view_count, a.status, a.published_at,
+                       u.username AS author_name, u.is_verified_author
+                FROM articles a
+                JOIN users u ON a.author_id = u.user_id
+                WHERE a.status = 'PUBLISHED'
+                ORDER BY a.published_at DESC
                 """
             )
         return [dict(r) for r in cur.fetchall()]

@@ -97,6 +97,8 @@ class ArticleListResponse(BaseModel):
     view_count: int
     status: str
     published_at: Optional[datetime] = None
+    author_name: Optional[str] = None
+    is_verified_author: Optional[bool] = False
 
 # ================================================================================
 # INTERACTION SCHEMAS
