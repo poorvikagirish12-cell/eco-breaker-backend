@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 import schemas
 from database import get_connection
+from security import get_current_user_id
 
 router = APIRouter(prefix="/api/interactions", tags=["Interactions"])
 
 
 @router.post("/view", status_code=status.HTTP_201_CREATED)
-def log_view_interaction(interaction: schemas.ViewInteraction, article_id: int):
+def log_view_interaction(interaction: schemas.ViewInteraction, article_id: int, current_user_id: int = Depends(get_current_user_id)):
     """
     28. Log a view interaction when a user reads an article (CRITICAL — feeds algorithm)
     - INSERT new row in view_logs.
@@ -21,9 +22,9 @@ def log_view_interaction(interaction: schemas.ViewInteraction, article_id: int):
         cur.execute(
             """
             INSERT INTO view_logs (user_id, article_id, view_duration_seconds)
-            VALUES (1, %s, %s)
+            VALUES (%s, %s, %s)
             """,
-            (article_id, interaction.view_duration_seconds),
+            (current_user_id, article_id, interaction.view_duration_seconds),
         )
 
         # Update article view count
@@ -46,17 +47,17 @@ def log_view_interaction(interaction: schemas.ViewInteraction, article_id: int):
         )
         tag_rows = cur.fetchall()
 
-        # Update user affinity scores for each tag (mock user_id = 1)
+        # Update user affinity scores for each tag
         for tag_row in tag_rows:
             tag_id = tag_row["tag_id"]
             cur.execute(
                 """
                 INSERT INTO user_preferences (user_id, tag_id, affinity_score)
-                VALUES (1, %s, 1)
+                VALUES (%s, %s, 1)
                 ON CONFLICT (user_id, tag_id)
                 DO UPDATE SET affinity_score = user_preferences.affinity_score + 1, updated_at = NOW()
                 """,
-                (tag_id,),
+                (current_user_id, tag_id),
             )
 
         conn.commit()
@@ -69,7 +70,7 @@ def log_view_interaction(interaction: schemas.ViewInteraction, article_id: int):
 
 
 @router.post("/like", status_code=status.HTTP_201_CREATED)
-def like_article(article_id: int):
+def like_article(article_id: int, current_user_id: int = Depends(get_current_user_id)):
     """
     29. Like an article
     """
@@ -79,10 +80,10 @@ def like_article(article_id: int):
         cur.execute(
             """
             INSERT INTO article_interactions (user_id, article_id, interaction_type)
-            VALUES (1, %s, 'LIKE')
+            VALUES (%s, %s, 'LIKE')
             ON CONFLICT DO NOTHING
             """,
-            (article_id,),
+            (current_user_id, article_id),
         )
         conn.commit()
         return {"message": "Article liked"}
@@ -94,7 +95,7 @@ def like_article(article_id: int):
 
 
 @router.delete("/like/{article_id}", status_code=status.HTTP_204_NO_CONTENT)
-def unlike_article(article_id: int):
+def unlike_article(article_id: int, current_user_id: int = Depends(get_current_user_id)):
     """
     30. Unlike an article
     """
@@ -104,9 +105,9 @@ def unlike_article(article_id: int):
         cur.execute(
             """
             DELETE FROM article_interactions
-            WHERE user_id = 1 AND article_id = %s AND interaction_type = 'LIKE'
+            WHERE user_id = %s AND article_id = %s AND interaction_type = 'LIKE'
             """,
-            (article_id,),
+            (current_user_id, article_id),
         )
         conn.commit()
     finally:
@@ -114,7 +115,7 @@ def unlike_article(article_id: int):
 
 
 @router.post("/save", status_code=status.HTTP_201_CREATED)
-def save_article(article_id: int):
+def save_article(article_id: int, current_user_id: int = Depends(get_current_user_id)):
     """
     31. Save/bookmark an article for later reading
     """
@@ -124,10 +125,10 @@ def save_article(article_id: int):
         cur.execute(
             """
             INSERT INTO article_interactions (user_id, article_id, interaction_type)
-            VALUES (1, %s, 'SAVE')
+            VALUES (%s, %s, 'SAVE')
             ON CONFLICT DO NOTHING
             """,
-            (article_id,),
+            (current_user_id, article_id),
         )
         conn.commit()
         return {"message": "Article saved"}
@@ -139,7 +140,7 @@ def save_article(article_id: int):
 
 
 @router.delete("/save/{article_id}", status_code=status.HTTP_204_NO_CONTENT)
-def unsave_article(article_id: int):
+def unsave_article(article_id: int, current_user_id: int = Depends(get_current_user_id)):
     """
     32. Remove a saved/bookmarked article
     """
@@ -149,10 +150,11 @@ def unsave_article(article_id: int):
         cur.execute(
             """
             DELETE FROM article_interactions
-            WHERE user_id = 1 AND article_id = %s AND interaction_type = 'SAVE'
+            WHERE user_id = %s AND article_id = %s AND interaction_type = 'SAVE'
             """,
-            (article_id,),
+            (current_user_id, article_id),
         )
         conn.commit()
     finally:
         conn.close()
+

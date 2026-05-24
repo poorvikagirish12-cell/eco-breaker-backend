@@ -3,10 +3,20 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
+from contextlib import asynccontextmanager
 
 from routers import auth, users, authors, articles, tags, feed, interactions, admin
+from database import run_migrations
 
 load_dotenv()
+
+# ---------------------------------------------------------------------------
+# Lifespan startup migrations
+# ---------------------------------------------------------------------------
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    run_migrations()
+    yield
 
 # ---------------------------------------------------------------------------
 # App factory
@@ -19,18 +29,25 @@ app = FastAPI(
     ),
     version="1.0.0",
     docs_url=None,   # we serve a custom /docs page below
+    lifespan=lifespan,
 )
 
 # ---------------------------------------------------------------------------
 # CORS — allow the Vercel frontend (and localhost for dev)
 # Set ALLOWED_ORIGINS in your Render environment variables:
 #   e.g.  https://echobreaker.vercel.app,http://localhost:3000
-# If the variable is absent we default to allowing all origins (dev-friendly).
 # ---------------------------------------------------------------------------
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
+if allowed_origins_str:
+    allowed_origins = [orig.strip() for orig in allowed_origins_str.split(",") if orig.strip()]
+else:
+    # Safe defaults for local dev. In production, configure ALLOWED_ORIGINS.
+    allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=allowed_origins,
+    allow_credentials=True if allowed_origins != ["*"] else False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -41,10 +58,12 @@ app.add_middleware(
 @app.exception_handler(Exception)
 async def debug_exception_handler(request, exc):
     import traceback
+    print("Internal Server Error occurred:")
+    traceback.print_exc()
+    
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc), "traceback": traceback.format_exc()},
-        headers={"Access-Control-Allow-Origin": "*"}
+        content={"detail": "Internal Server Error. Check server logs for details."},
     )
 
 # ---------------------------------------------------------------------------
@@ -121,25 +140,9 @@ async def custom_swagger_ui_html():
 # ---------------------------------------------------------------------------
 @app.get("/")
 def read_root():
-    db_url = os.getenv("DATABASE_URL", "")
-    masked_db_url = "Not Set"
-    if db_url:
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(db_url)
-            netloc = parsed.netloc
-            if "@" in netloc:
-                user_pass, host_port = netloc.split("@", 1)
-                if ":" in user_pass:
-                    user, _ = user_pass.split(":", 1)
-                    netloc = f"{user}:******@{host_port}"
-                else:
-                    netloc = f"{user_pass}:******@{host_port}"
-            masked_db_url = parsed._replace(netloc=netloc).geturl()
-        except Exception as e:
-            masked_db_url = f"Error: {str(e)}"
-            
+    # Only reveal whether database URL is configured to prevent infrastructure leakage
+    db_configured = bool(os.getenv("DATABASE_URL"))
     return {
         "message": "EchoBreaker API is live. Visit /docs for Swagger UI. Version: 1.0.1",
-        "database_url": masked_db_url
+        "database_configured": db_configured
     }

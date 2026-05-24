@@ -1,9 +1,15 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 from typing import List
 import schemas
 from database import get_connection
+from security import get_current_admin_user_id
 
-router = APIRouter(prefix="/api/admin", tags=["Admin"])
+router = APIRouter(
+    prefix="/api/admin",
+    tags=["Admin"],
+    dependencies=[Depends(get_current_admin_user_id)]
+)
+
 
 
 @router.put("/authors/{user_id}/approve", status_code=status.HTTP_200_OK)

@@ -24,3 +24,23 @@ def get_connection():
         )
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
+
+
+def run_migrations():
+    """
+    Runs database schema migrations on startup, such as adding the is_admin column
+    if it does not already exist.
+    """
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        # Add is_admin column if it doesn't exist
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;")
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        # Non-fatal warning if migration fails due to db setup issues
+        print(f"Warning: Database startup migration failed: {str(e)}")
+    finally:
+        conn.close()
+

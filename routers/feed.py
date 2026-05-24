@@ -1,13 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from typing import List
 import schemas
 from database import get_connection
+from security import get_current_user_id
 
 router = APIRouter(prefix="/api/feed", tags=["Feed"])
 
 
 @router.get("", response_model=List[schemas.ArticleListResponse])
-def get_contrarian_feed():
+def get_contrarian_feed(current_user_id: int = Depends(get_current_user_id)):
     """
     26. Fetch personalized contrarian feed (THE CORE ALGORITHM).
     Step 1 — Find user's TOP tags (highest affinity).
@@ -18,14 +19,15 @@ def get_contrarian_feed():
     try:
         cur = conn.cursor()
 
-        # Step 1: top tags for the (mock) current user
+        # Step 1: top tags for the current user
         cur.execute(
             """
             SELECT tag_id FROM user_preferences
-            WHERE user_id = 1
+            WHERE user_id = %s
             ORDER BY affinity_score DESC
             LIMIT 5
-            """
+            """,
+            (current_user_id,)
         )
         top_tag_ids = [r["tag_id"] for r in cur.fetchall()]
 
@@ -40,12 +42,12 @@ def get_contrarian_feed():
                       SELECT article_id FROM article_tags WHERE tag_id = ANY(%s)
                   )
                   AND a.article_id NOT IN (
-                      SELECT article_id FROM view_logs WHERE user_id = 1
+                      SELECT article_id FROM view_logs WHERE user_id = %s
                   )
                 ORDER BY a.published_at DESC
                 LIMIT 20
                 """,
-                (top_tag_ids,),
+                (top_tag_ids, current_user_id),
             )
         else:
             # No preferences yet — return latest published articles
@@ -60,3 +62,4 @@ def get_contrarian_feed():
         return [dict(r) for r in cur.fetchall()]
     finally:
         conn.close()
+
