@@ -153,7 +153,7 @@ def report_top_articles():
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT article_id, title, author_id, view_count, status, published_at
+            SELECT article_id, title, content, author_id, view_count, status, published_at
             FROM articles
             WHERE status = 'PUBLISHED'
             ORDER BY view_count DESC

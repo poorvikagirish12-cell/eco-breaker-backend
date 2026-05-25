@@ -38,7 +38,7 @@ def view_my_articles(current_user_id: int = Depends(get_current_user_id)):
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT article_id, title, author_id, view_count, status, published_at
+            SELECT article_id, title, content, author_id, view_count, status, published_at
             FROM articles WHERE author_id = %s
             ORDER BY created_at DESC
             """,
@@ -57,7 +57,7 @@ def view_author_articles(user_id: int):
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT article_id, title, author_id, view_count, status, published_at
+            SELECT article_id, title, content, author_id, view_count, status, published_at
             FROM articles WHERE author_id = %s AND status = 'PUBLISHED'
             ORDER BY published_at DESC
             """,

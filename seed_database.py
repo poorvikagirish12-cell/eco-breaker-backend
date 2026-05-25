@@ -106,6 +106,95 @@ TAGS_DATA = [
      "Moving away from oil does not end resource dependency; it shifts power to nations controlling lithium, cobalt, and rare earths.")
 ]
 
+WIKIPEDIA_LINKS = {
+    "Artificial Intelligence": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+    "Quantum Computing": "https://en.wikipedia.org/wiki/Quantum_computing",
+    "Web3": "https://en.wikipedia.org/wiki/Web3",
+    "Cybersecurity": "https://en.wikipedia.org/wiki/Computer_security",
+    "Robotics": "https://en.wikipedia.org/wiki/Robotics",
+    "Metaverse": "https://en.wikipedia.org/wiki/Metaverse",
+    "Space Exploration": "https://en.wikipedia.org/wiki/Space_exploration",
+    "Neuroscience": "https://en.wikipedia.org/wiki/Neuroscience",
+    "Fusion Energy": "https://en.wikipedia.org/wiki/Nuclear_fusion",
+    "Biotechnology": "https://en.wikipedia.org/wiki/Biotechnology",
+    "Climate Change": "https://en.wikipedia.org/wiki/Climate_change",
+    "Renewable Energy": "https://en.wikipedia.org/wiki/Renewable_energy",
+    "Electric Vehicles": "https://en.wikipedia.org/wiki/Electric_vehicle",
+    "Remote Work": "https://en.wikipedia.org/wiki/Telecommuting",
+    "Macroeconomics": "https://en.wikipedia.org/wiki/Macroeconomics",
+    "Education Reform": "https://en.wikipedia.org/wiki/Education_reform",
+    "Social Media": "https://en.wikipedia.org/wiki/Social_media",
+    "Minimalism": "https://en.wikipedia.org/wiki/Minimalism",
+    "Stoicism": "https://en.wikipedia.org/wiki/Stoicism",
+    "Existentialism": "https://en.wikipedia.org/wiki/Existentialism",
+    "Cryptography": "https://en.wikipedia.org/wiki/Cryptography",
+    "Mental Health": "https://en.wikipedia.org/wiki/Mental_health",
+    "Global Economy": "https://en.wikipedia.org/wiki/World_economy",
+    "Nanotechnology": "https://en.wikipedia.org/wiki/Nanotechnology",
+    "Astronomy": "https://en.wikipedia.org/wiki/Astronomy",
+    "Philosophy": "https://en.wikipedia.org/wiki/Philosophy",
+    "Digital Privacy": "https://en.wikipedia.org/wiki/Information_privacy",
+    "Genetic Engineering": "https://en.wikipedia.org/wiki/Genetic_engineering",
+    "Urban Farming": "https://en.wikipedia.org/wiki/Urban_agriculture",
+    "3D Printing": "https://en.wikipedia.org/wiki/3D_printing",
+    "Oceanography": "https://en.wikipedia.org/wiki/Oceanography",
+    "History": "https://en.wikipedia.org/wiki/History",
+    "Classical Music": "https://en.wikipedia.org/wiki/Classical_music",
+    "Modern Art": "https://en.wikipedia.org/wiki/Modern_art",
+    "Creative Writing": "https://en.wikipedia.org/wiki/Creative_writing",
+    "Micro-mobility": "https://en.wikipedia.org/wiki/Micromobility",
+    "Smart Cities": "https://en.wikipedia.org/wiki/Smart_city",
+    "Astrophysics": "https://en.wikipedia.org/wiki/Astrophysics",
+    "Behavioral Economics": "https://en.wikipedia.org/wiki/Behavioral_economics",
+    "Deep Learning": "https://en.wikipedia.org/wiki/Deep_learning",
+    "Augmented Reality": "https://en.wikipedia.org/wiki/Augmented_reality",
+    "Sustainable Fashion": "https://en.wikipedia.org/wiki/Sustainable_fashion",
+    "Telemedicine": "https://en.wikipedia.org/wiki/Telemedicine",
+    "Drone Tech": "https://en.wikipedia.org/wiki/Unmanned_aerial_vehicle",
+    "Food Tech": "https://en.wikipedia.org/wiki/Food_technology",
+    "Cognitive Science": "https://en.wikipedia.org/wiki/Cognitive_science",
+    "Astrobiology": "https://en.wikipedia.org/wiki/Astrobiology",
+    "Blockchain": "https://en.wikipedia.org/wiki/Blockchain",
+    "High-Speed Rail": "https://en.wikipedia.org/wiki/High-speed_rail",
+    "Philosophy of Mind": "https://en.wikipedia.org/wiki/Philosophy_of_mind",
+    "Marine Biology": "https://en.wikipedia.org/wiki/Marine_biology",
+    "Renewable Power": "https://en.wikipedia.org/wiki/Renewable_energy",
+}
+
+def generate_contrarian_essay(tag_name: str, title: str, brief: str) -> str:
+    clean_brief = brief.strip()
+    if clean_brief.endswith("."):
+        clean_brief = clean_brief[:-1]
+        
+    # Simple deterministic hash of the title to choose a template
+    h = sum(ord(c) for c in title)
+    
+    intros = [
+        f"In contemporary debates surrounding {tag_name}, mainstream consensus often leans heavily toward a single, comfortable narrative. However, when we critically examine '{title}', these prevailing assumptions begin to unravel. It becomes clear that simplistic conclusions do not capture the real-world friction of this domain.",
+        f"Discussions around {tag_name} are frequently dominated by optimistic headlines and unquestioned paradigms. Yet, a closer look at '{title}' reveals a much more complex and contradictory truth. Mainstream perspectives often neglect the core challenges in favor of easy solutions.",
+        f"The collective enthusiasm surrounding {tag_name} frequently obscures the systemic problems lying just beneath the surface. When analyzing the proposal '{title}', we are forced to confront the gap between popular expectations and actual structural realities."
+    ]
+    
+    bodies = [
+        f"The core of this argument lies in the economic and cognitive trade-offs we choose to make. Specifically, {clean_brief.lower() if (clean_brief.startswith('In') or clean_brief.startswith('While') or clean_brief.startswith('Instead')) else clean_brief}. By shifting the structural bottleneck rather than solving it, these changes introduce new inefficiencies and hidden dependencies that are rarely acknowledged by advocates.",
+        f"This tension highlights a fundamental flaw in how we evaluate this sector. For instance, {clean_brief}. Rather than resolving systemic issues, the proposed solutions often relocate the vulnerabilities, creating secondary hazards and long-term costs that outweigh the immediate benefits.",
+        f"An objective analysis of these dynamics reveals that the popular narrative is built on fragile premises. As detailed here, {clean_brief}. Without addressing these hidden bottlenecks, any attempts to implement standard strategies are bound to result in diminishing returns."
+    ]
+    
+    conclusions = [
+        f"Ultimately, moving beyond the simplistic marketing of {tag_name} requires a radical re-evaluation of our priorities. The future of this landscape depends not on blind adoption, but on our willingness to question the status quo and address the underlying costs of our collective choices.",
+        f"In conclusion, dismantling the common myths surrounding {tag_name} is the first step toward genuine progress. Real innovation requires that we move past superficial slogans and confront the structural limitations inherent in '{title}'.",
+        f"Moving forward, we must replace optimistic rhetoric with critical analysis. The evolution of {tag_name} will be shaped not by those who champion easy answers, but by those willing to examine the uncomfortable realities of modern implementation."
+    ]
+    
+    intro = intros[h % len(intros)]
+    body = bodies[(h + 1) % len(bodies)]
+    conclusion = conclusions[(h + 2) % len(conclusions)]
+    
+    wiki_url = WIKIPEDIA_LINKS.get(tag_name, "https://en.wikipedia.org/wiki/Main_Page")
+    
+    return f"{intro}\n\n{body}\n\n{conclusion}\n\nSource & Brief Description: {wiki_url}"
+
 def seed_db():
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
@@ -116,6 +205,10 @@ def seed_db():
     try:
         conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor)
         cur = conn.cursor()
+        
+        # 0. Clear old articles from the platform database
+        print("Truncating old articles, tags, interactions, and log tables...")
+        cur.execute("TRUNCATE TABLE article_tags, view_logs, article_interactions, articles CASCADE;")
         
         # 1. Ensure default author user exists
         print("Ensuring default author exists...")
@@ -147,6 +240,9 @@ def seed_db():
             )
             tag_id = cur.fetchone()["tag_id"]
             
+            # Generate rich, realistic 3-paragraph essay content
+            rich_content = generate_contrarian_essay(tag_name, title, content)
+            
             # Insert Article
             cur.execute(
                 """
@@ -155,7 +251,7 @@ def seed_db():
                 ON CONFLICT DO NOTHING
                 RETURNING article_id
                 """,
-                (author_id, title, content, 25) # Give it some initial views
+                (author_id, title, rich_content, 25) # Give it some initial views
             )
             article_row = cur.fetchone()
             
