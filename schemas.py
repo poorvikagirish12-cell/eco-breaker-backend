@@ -20,6 +20,7 @@ class UserResponse(UserBase):
     user_id: int
     is_verified_author: bool
     is_active: bool
+    is_admin: Optional[bool] = False
     created_at: datetime
     last_login: Optional[datetime] = None
     token: Optional[str] = None
@@ -93,6 +94,7 @@ class ArticleResponse(ArticleBase):
 class ArticleListResponse(BaseModel):
     article_id: int
     title: str
+    content: Optional[str] = None
     author_id: int
     view_count: int
     status: str

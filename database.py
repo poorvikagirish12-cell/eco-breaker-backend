@@ -36,6 +36,10 @@ def run_migrations():
         cur = conn.cursor()
         # Add is_admin column if it doesn't exist
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;")
+        # Add email verification columns
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(512);")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_token_expires_at TIMESTAMPTZ;")
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -43,4 +47,5 @@ def run_migrations():
         print(f"Warning: Database startup migration failed: {str(e)}")
     finally:
         conn.close()
+
 

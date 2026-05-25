@@ -85,7 +85,7 @@ def view_saved_articles(current_user_id: int = Depends(get_current_user_id)):
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT a.article_id, a.title, a.author_id, a.view_count, a.status, a.published_at,
+            SELECT a.article_id, a.title, a.content, a.author_id, a.view_count, a.status, a.published_at,
                    u.username AS author_name, u.is_verified_author
             FROM articles a
             JOIN users u ON a.author_id = u.user_id
