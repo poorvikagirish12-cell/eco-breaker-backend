@@ -22,7 +22,7 @@ def get_connection():
             "DATABASE_URL environment variable is not set. "
             "Add it to your .env file locally or to Render's Environment Variables."
         )
-    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor, connect_timeout=5)
     return conn
 
 
