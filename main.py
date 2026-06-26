@@ -166,3 +166,7 @@ def read_root():
         "message": "EchoBreaker API is live. Visit /docs for Swagger UI. Version: 1.0.1",
         "database_configured": db_configured
     }
+
+@app.get("/debug-env")
+def debug_env():
+    return {"db_url": os.getenv("DATABASE_URL")}
