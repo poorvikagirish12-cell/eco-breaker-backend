@@ -44,7 +44,11 @@ if allowed_origins_str:
     allowed_origins = [orig.strip() for orig in allowed_origins_str.split(",") if orig.strip()]
 else:
     # Safe defaults for local dev. In production, configure ALLOWED_ORIGINS.
-    allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://eco-breaker-frontend.vercel.app"
+    ]
 
 app.add_middleware(
     CORSMiddleware,
