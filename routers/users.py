@@ -166,13 +166,3 @@ def clear_reading_history(current_user_id: int = Depends(get_current_user_id)):
         conn.close()
 
 
-@router.get("/list-users-debug")
-def list_users_debug():
-    conn = get_connection()
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT user_id, username, email FROM users;")
-        return [dict(r) for r in cur.fetchall()]
-    finally:
-        conn.close()
-

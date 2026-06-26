@@ -167,6 +167,4 @@ def read_root():
         "database_configured": db_configured
     }
 
-@app.get("/debug-env")
-def debug_env():
-    return {"db_url": os.getenv("DATABASE_URL")}
+
