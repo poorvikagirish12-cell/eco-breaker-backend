@@ -90,6 +90,9 @@ class ArticleResponse(ArticleBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     published_at: Optional[datetime] = None
+    author_name: Optional[str] = None
+    is_verified_author: Optional[bool] = False
+
 
 class ArticleListResponse(BaseModel):
     article_id: int

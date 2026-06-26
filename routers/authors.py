@@ -38,9 +38,12 @@ def view_my_articles(current_user_id: int = Depends(get_current_user_id)):
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT article_id, title, content, author_id, view_count, status, published_at
-            FROM articles WHERE author_id = %s
-            ORDER BY created_at DESC
+            SELECT a.article_id, a.title, a.content, a.author_id, a.view_count, a.status, a.published_at,
+                   u.username AS author_name, u.is_verified_author
+            FROM articles a
+            JOIN users u ON a.author_id = u.user_id
+            WHERE a.author_id = %s
+            ORDER BY a.created_at DESC
             """,
             (current_user_id,)
         )
@@ -57,9 +60,12 @@ def view_author_articles(user_id: int):
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT article_id, title, content, author_id, view_count, status, published_at
-            FROM articles WHERE author_id = %s AND status = 'PUBLISHED'
-            ORDER BY published_at DESC
+            SELECT a.article_id, a.title, a.content, a.author_id, a.view_count, a.status, a.published_at,
+                   u.username AS author_name, u.is_verified_author
+            FROM articles a
+            JOIN users u ON a.author_id = u.user_id
+            WHERE a.author_id = %s AND a.status = 'PUBLISHED'
+            ORDER BY a.published_at DESC
             """,
             (user_id,),
         )

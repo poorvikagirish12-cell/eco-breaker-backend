@@ -17,18 +17,32 @@ def create_article(article: schemas.ArticleCreate, current_user_id: int = Depend
             """
             INSERT INTO articles (author_id, title, content, status, view_count)
             VALUES (%s, %s, %s, 'DRAFT', 0)
-            RETURNING article_id, author_id, title, content, view_count, status,
-                      created_at, updated_at, published_at
+            RETURNING article_id
             """,
             (current_user_id, article.title, article.content),
         )
+        article_id = cur.fetchone()["article_id"]
+        
+        cur.execute(
+            """
+            SELECT a.article_id, a.author_id, a.title, a.content, a.view_count, a.status,
+                   a.created_at, a.updated_at, a.published_at,
+                   u.username AS author_name, u.is_verified_author
+            FROM articles a
+            JOIN users u ON a.author_id = u.user_id
+            WHERE a.article_id = %s
+            """,
+            (article_id,),
+        )
+        row = cur.fetchone()
         conn.commit()
-        return dict(cur.fetchone())
+        return dict(row)
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()
+
 
 
 @router.get("", response_model=List[schemas.ArticleListResponse])
@@ -101,9 +115,12 @@ def read_article(article_id: int):
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT article_id, author_id, title, content, view_count, status,
-                   created_at, updated_at, published_at
-            FROM articles WHERE article_id = %s AND status = 'PUBLISHED'
+            SELECT a.article_id, a.author_id, a.title, a.content, a.view_count, a.status,
+                   a.created_at, a.updated_at, a.published_at,
+                   u.username AS author_name, u.is_verified_author
+            FROM articles a
+            JOIN users u ON a.author_id = u.user_id
+            WHERE a.article_id = %s AND a.status = 'PUBLISHED'
             """,
             (article_id,),
         )
@@ -113,6 +130,7 @@ def read_article(article_id: int):
         return dict(row)
     finally:
         conn.close()
+
 
 
 @router.put("/{article_id}", response_model=schemas.ArticleResponse)
@@ -136,9 +154,20 @@ def update_draft(article_id: int, article_update: schemas.ArticleUpdate, current
             cur.execute("UPDATE articles SET content=%s, updated_at=NOW() WHERE article_id=%s AND author_id=%s",
                         (article_update.content, article_id, current_user_id))
         conn.commit()
-        cur.execute("SELECT article_id, author_id, title, content, view_count, status, created_at, updated_at, published_at FROM articles WHERE article_id=%s", (article_id,))
+        cur.execute(
+            """
+            SELECT a.article_id, a.author_id, a.title, a.content, a.view_count, a.status,
+                   a.created_at, a.updated_at, a.published_at,
+                   u.username AS author_name, u.is_verified_author
+            FROM articles a
+            JOIN users u ON a.author_id = u.user_id
+            WHERE a.article_id = %s
+            """,
+            (article_id,),
+        )
         row = cur.fetchone()
         return dict(row)
+
     except HTTPException:
         raise
     except Exception as e:
@@ -186,14 +215,25 @@ def publish_article(article_id: int, current_user_id: int = Depends(get_current_
             """
             UPDATE articles SET status='PUBLISHED', published_at=NOW()
             WHERE article_id=%s AND author_id=%s
-            RETURNING article_id, author_id, title, content, view_count, status,
-                      created_at, updated_at, published_at
             """,
             (article_id, current_user_id),
         )
         conn.commit()
+        
+        cur.execute(
+            """
+            SELECT a.article_id, a.author_id, a.title, a.content, a.view_count, a.status,
+                   a.created_at, a.updated_at, a.published_at,
+                   u.username AS author_name, u.is_verified_author
+            FROM articles a
+            JOIN users u ON a.author_id = u.user_id
+            WHERE a.article_id = %s
+            """,
+            (article_id,),
+        )
         row = cur.fetchone()
         return dict(row)
+
     finally:
         conn.close()
 
@@ -216,14 +256,25 @@ def unpublish_article(article_id: int, current_user_id: int = Depends(get_curren
             """
             UPDATE articles SET status='DRAFT', published_at=NULL
             WHERE article_id=%s AND author_id=%s
-            RETURNING article_id, author_id, title, content, view_count, status,
-                      created_at, updated_at, published_at
             """,
             (article_id, current_user_id),
         )
         conn.commit()
+        
+        cur.execute(
+            """
+            SELECT a.article_id, a.author_id, a.title, a.content, a.view_count, a.status,
+                   a.created_at, a.updated_at, a.published_at,
+                   u.username AS author_name, u.is_verified_author
+            FROM articles a
+            JOIN users u ON a.author_id = u.user_id
+            WHERE a.article_id = %s
+            """,
+            (article_id,),
+        )
         row = cur.fetchone()
         return dict(row)
+
     finally:
         conn.close()
 
