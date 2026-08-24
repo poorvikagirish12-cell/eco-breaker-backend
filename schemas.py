@@ -92,6 +92,8 @@ class ArticleResponse(ArticleBase):
     published_at: Optional[datetime] = None
     author_name: Optional[str] = None
     is_verified_author: Optional[bool] = False
+    ai_summary: Optional[List[str]] = None
+    credibility_score: Optional[float] = None
 
 
 class ArticleListResponse(BaseModel):
@@ -104,6 +106,8 @@ class ArticleListResponse(BaseModel):
     published_at: Optional[datetime] = None
     author_name: Optional[str] = None
     is_verified_author: Optional[bool] = False
+    ai_summary: Optional[List[str]] = None
+    credibility_score: Optional[float] = None
 
 # ================================================================================
 # INTERACTION SCHEMAS
